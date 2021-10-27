@@ -28,7 +28,7 @@ dependencies {
 	// CC: Restitched and its runtime dependencies
 	// todo: jitpack doesn't use java 16
 //	modImplementation "com.github.cc-tweaked:cc-restitched:${project.cc_version_tag}"
-	modImplementation "com.github.joecharamut:cc-restitched:1.17.1-SNAPSHOT"
+	modImplementation "com.github.joecharamut:cc-restitched:${project.cc_version_tag}"
 	implementation "com.electronwill.night-config:toml:3.6.3"
 	implementation "com.google.code.findbugs:jsr305:3.0.2"
 }
