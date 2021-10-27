@@ -10,6 +10,7 @@ import org.lwjgl.glfw.GLFW;
 import rocks.spaghetti.ccideaplugin.network.ClientPacketHandler;
 import rocks.spaghetti.ccideaplugin.network.ServerPacketHandler;
 import rocks.spaghetti.ccideaplugin.network.WrappedClientNetworking;
+import rocks.spaghetti.ccideaplugin.rmi.RmiStub;
 
 import java.net.MalformedURLException;
 import java.rmi.Naming;

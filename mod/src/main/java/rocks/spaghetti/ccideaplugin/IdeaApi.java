@@ -4,6 +4,7 @@ import dan200.computercraft.api.lua.IComputerSystem;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import rocks.spaghetti.ccideaplugin.network.WrappedClientNetworking;
+import rocks.spaghetti.ccideaplugin.rmi.RmiStub;
 
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;

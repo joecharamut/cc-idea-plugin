@@ -1,89 +1,120 @@
 plugins {
-	id 'fabric-loom' version '0.9-SNAPSHOT'
-	id 'maven-publish'
+	id "java"
+	id "fabric-loom" version "0.9-SNAPSHOT" apply false
+	id "org.jetbrains.intellij" version "1.2.0" apply false
 }
 
-sourceCompatibility = JavaVersion.VERSION_16
-targetCompatibility = JavaVersion.VERSION_16
-
-archivesBaseName = project.archives_base_name
-version = project.mod_version
-group = project.maven_group
-
-repositories {
-	maven { url "https://maven.shedaniel.me/" }
-	maven { url "https://maven.terraformersmc.com/" }
-	maven { url "https://jitpack.io" }
+subprojects {
+	buildDir = new File(rootProject.buildDir, it.name)
 }
 
-dependencies {
-	// To change the versions see the gradle.properties file
-	minecraft "com.mojang:minecraft:${project.minecraft_version}"
-	mappings "net.fabricmc:yarn:${project.yarn_mappings}:v2"
-	modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
+group project.maven_group
+version "0.0.1"
 
-	// Fabric API. This is technically optional, but you probably want it anyway.
-	modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
-
-	// CC: Restitched and its runtime dependencies
-	// todo: jitpack doesn't use java 16
-//	modImplementation "com.github.cc-tweaked:cc-restitched:${project.cc_version_tag}"
-	modImplementation "com.github.joecharamut:cc-restitched:${project.cc_version_tag}"
-	implementation "com.electronwill.night-config:toml:3.6.3"
-	implementation "com.google.code.findbugs:jsr305:3.0.2"
-}
-
-processResources {
-	inputs.property "version", project.version
-
-	filesMatching("fabric.mod.json") {
-		expand "version": project.version
+project("interface") {
+	apply plugin: "java"
+	compileJava {
+		sourceCompatibility = JavaVersion.VERSION_11
+		targetCompatibility = JavaVersion.VERSION_11
 	}
 }
 
-tasks.withType(JavaCompile).configureEach {
-	// ensure that the encoding is set to UTF-8, no matter what the system default is
-	// this fixes some edge cases with special characters not displaying correctly
-	// see http://yodaconditions.net/blog/fix-for-java-file-encoding-problems-with-gradle.html
-	// If Javadoc is generated, this must be specified in that task too.
-	it.options.encoding = "UTF-8"
+project("plugin") {
+	apply plugin: "java"
+	apply plugin: "org.jetbrains.intellij"
 
-	// Minecraft 1.17 (21w19a) upwards uses Java 16.
-	it.options.release = 16
-}
+	compileJava {
+		sourceCompatibility = JavaVersion.VERSION_11
+		targetCompatibility = JavaVersion.VERSION_11
+	}
 
-java {
-	// Loom will automatically attach sourcesJar to a RemapSourcesJar task and to the "build" task
-	// if it is present.
-	// If you remove this line, sources will not be generated.
-	withSourcesJar()
-}
+	repositories {
+		mavenCentral()
+	}
 
-jar {
-	from("LICENSE") {
-		rename { "${it}_${project.archivesBaseName}"}
+	dependencies {
+		implementation project(":interface")
+	}
+
+	// See https://github.com/JetBrains/gradle-intellij-plugin/
+	intellij {
+		version = '2021.1.3'
+	}
+
+	patchPluginXml {
+		changeNotes = """
+		  Add change notes here.<br>
+		  <em>most HTML tags may be used</em>"""
 	}
 }
 
-// configure the maven publication
-publishing {
-	publications {
-		mavenJava(MavenPublication) {
-			// add all the jars that should be included when publishing to maven
-			artifact(remapJar) {
-				builtBy remapJar
-			}
-			artifact(sourcesJar) {
-				builtBy remapSourcesJar
-			}
+project("mod") {
+	apply plugin: "fabric-loom"
+
+	compileJava {
+		sourceCompatibility = JavaVersion.VERSION_16
+		targetCompatibility = JavaVersion.VERSION_16
+	}
+
+	archivesBaseName = project.mod_base_name
+	version = project.mod_version
+	group = project.maven_group
+
+	repositories {
+		maven { url "https://maven.shedaniel.me/" }
+		maven { url "https://maven.terraformersmc.com/" }
+		maven { url "https://jitpack.io" }
+	}
+
+	dependencies {
+		// To change the versions see the gradle.properties file
+		minecraft "com.mojang:minecraft:${project.minecraft_version}"
+		mappings "net.fabricmc:yarn:${project.yarn_mappings}:v2"
+		modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
+
+		// Fabric API. This is technically optional, but you probably want it anyway.
+		modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
+
+		// CC: Restitched and its runtime dependencies
+		// todo: jitpack doesn't use java 16
+		//	modImplementation "com.github.cc-tweaked:cc-restitched:${project.cc_version_tag}"
+		modImplementation "com.github.joecharamut:cc-restitched:${project.cc_version_tag}"
+		implementation "com.electronwill.night-config:toml:3.6.3"
+		implementation "com.google.code.findbugs:jsr305:3.0.2"
+		implementation include(project(":interface"))
+	}
+
+	processResources {
+		inputs.property "version", project.version
+
+		filesMatching("fabric.mod.json") {
+			expand "version": project.version
 		}
 	}
 
-	// See https://docs.gradle.org/current/userguide/publishing_maven.html for information on how to set up publishing.
-	repositories {
-		// Add repositories to publish to here.
-		// Notice: This block does NOT have the same function as the block in the top level.
-		// The repositories here will be used for publishing your artifact, not for
-		// retrieving dependencies.
+	tasks.withType(JavaCompile).configureEach {
+		// ensure that the encoding is set to UTF-8, no matter what the system default is
+		// this fixes some edge cases with special characters not displaying correctly
+		// see http://yodaconditions.net/blog/fix-for-java-file-encoding-problems-with-gradle.html
+		// If Javadoc is generated, this must be specified in that task too.
+		it.options.encoding = "UTF-8"
+
+		// Minecraft 1.17 (21w19a) upwards uses Java 16.
+		it.options.release = 16
+	}
+
+	java {
+		// Loom will automatically attach sourcesJar to a RemapSourcesJar task and to the "build" task
+		// if it is present.
+		// If you remove this line, sources will not be generated.
+		withSourcesJar()
+	}
+
+	jar {
+		from("LICENSE") {
+			rename { "${it}_${project.archivesBaseName}"}
+		}
 	}
 }
+
+

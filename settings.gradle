@@ -1,9 +1,15 @@
 pluginManagement {
     repositories {
         maven {
-            name = 'Fabric'
-            url = 'https://maven.fabricmc.net/'
+            name = "Fabric"
+            url = "https://maven.fabricmc.net/"
         }
         gradlePluginPortal()
     }
 }
+
+rootProject.name = "cc-idea-plugin-mod"
+
+include "plugin"
+include "mod"
+include "interface"

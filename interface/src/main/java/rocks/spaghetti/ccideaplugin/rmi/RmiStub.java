@@ -1,4 +1,4 @@
-package rocks.spaghetti.ccideaplugin;
+package rocks.spaghetti.ccideaplugin.rmi;
 
 import java.rmi.Remote;
 import java.rmi.RemoteException;

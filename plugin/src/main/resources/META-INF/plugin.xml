@@ -1,0 +1,22 @@
+<idea-plugin>
+    <id>rocks.spaghetti.cc-idea-plugin</id>
+    <name>ComputerCraft(-Restitched) Integration</name>
+    <vendor email="support@spaghetti.rocks" url="http://www.spaghetti.rocks">spaghetti.rocks</vendor>
+
+    <description><![CDATA[
+    Connect to, and edit, computercraft programs
+    ]]></description>
+
+    <!-- please see https://plugins.jetbrains.com/docs/intellij/plugin-compatibility.html
+         on how to target different products -->
+    <depends>com.intellij.modules.platform</depends>
+
+    <extensions defaultExtensionNs="com.intellij">
+        <toolWindow id="ccideaplugin" factoryClass="rocks.spaghetti.ccideaplugin.CCToolWindowFactory" icon="toolwindows/toolWindowCommander.svg" />
+        <virtualFileSystem implementationClass="rocks.spaghetti.ccideaplugin.CCFileSystem" />
+    </extensions>
+
+    <actions>
+        <!-- Add your actions here -->
+    </actions>
+</idea-plugin>
