@@ -11,8 +11,8 @@ public class CCToolWindowFactory implements ToolWindowFactory {
     @Override
     public void createToolWindowContent(@NotNull Project project, @NotNull ToolWindow toolWindow) {
         CCIdeaPlugin.createInstance(project);
+        CCToolWindow window = new CCToolWindow(project);
 
-        CCToolWindow window = new CCToolWindow();
         ContentFactory contentFactory = ContentFactory.SERVICE.getInstance();
         Content content = contentFactory.createContent(window.getContent(), "", false);
         toolWindow.getContentManager().addContent(content);

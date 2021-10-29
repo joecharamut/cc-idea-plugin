@@ -1,5 +1,6 @@
 package rocks.spaghetti.ccideaplugin.network;
 
+import dan200.computercraft.ComputerCraft;
 import dan200.computercraft.core.filesystem.FileSystem;
 import dan200.computercraft.core.filesystem.FileSystemException;
 import dan200.computercraft.shared.computer.core.IComputer;
@@ -11,12 +12,13 @@ import net.minecraft.network.PacketByteBuf;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.Identifier;
-import rocks.spaghetti.ccideaplugin.IdeaApi;
+import org.apache.commons.lang3.ArrayUtils;
 import rocks.spaghetti.ccideaplugin.network.c2s.FileListC2SPacket;
-import rocks.spaghetti.ccideaplugin.network.c2s.GetComputerC2SPacket;
+import rocks.spaghetti.ccideaplugin.network.c2s.GetComputersC2SPacket;
 import rocks.spaghetti.ccideaplugin.network.s2c.FileListS2CPacket;
-import rocks.spaghetti.ccideaplugin.network.s2c.GetComputerS2CPacket;
+import rocks.spaghetti.ccideaplugin.network.s2c.GetComputersS2CPacket;
 
+import javax.annotation.Nullable;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
@@ -30,7 +32,7 @@ public class ServerPacketHandler {
 
     public void register() {
         registerPacket(FileListC2SPacket.ID, FileListC2SPacket.class);
-        registerPacket(GetComputerC2SPacket.ID, GetComputerC2SPacket.class);
+        registerPacket(GetComputersC2SPacket.ID, GetComputersC2SPacket.class);
     }
 
     public void handlePackets(MinecraftServer server) {
@@ -59,7 +61,8 @@ public class ServerPacketHandler {
                 });
     }
 
-    public ServerComputer getComputer(ServerPlayerEntity player) {
+    @Nullable
+    public ServerComputer getActiveComputer(ServerPlayerEntity player) {
         if (player == null) return null;
         if (!(player.currentScreenHandler instanceof ContainerComputerBase)) return null;
 
@@ -70,21 +73,37 @@ public class ServerPacketHandler {
         return ((ServerComputer) computer);
     }
 
-    public void onGetComputer(GetComputerC2SPacket packet) {
+    public ServerComputer[] getAccessibleComputers(ServerPlayerEntity player) {
+        if (player.isCreative() || player.hasPermissionLevel(4)) {
+            return ComputerCraft.serverComputerRegistry.getComputers().toArray(new ServerComputer[0]);
+        } else {
+            ServerComputer computer = getActiveComputer(player);
+            if (computer != null) {
+                return new ServerComputer[]{computer};
+            }
+        }
+
+        return new ServerComputer[0];
+    }
+
+    public void onGetComputer(GetComputersC2SPacket packet) {
         System.out.println(packet);
         if (packet.playerEntity == null) return;
 
-        ServerComputer computer = getComputer(packet.playerEntity);
+        ServerComputer computer = getActiveComputer(packet.playerEntity);
+        int activeComputer = computer == null ? -1 : computer.getID();
+        int[] accessibleComputers = ArrayUtils.toPrimitive(Arrays.stream(getAccessibleComputers(packet.playerEntity)).map(c -> c.getID()).toArray(Integer[]::new));
+
         ServerPlayNetworking.send(packet.playerEntity,
-                GetComputerS2CPacket.ID,
-                new GetComputerS2CPacket(computer == null ? -1 : computer.getID()).write(PacketByteBufs.create()));
+                GetComputersS2CPacket.ID,
+                new GetComputersS2CPacket(activeComputer, accessibleComputers).write(PacketByteBufs.create()));
     }
 
     public void onFileList(FileListC2SPacket packet) {
         System.out.println(packet);
         if (packet.playerEntity == null) return;
 
-        ServerComputer computer = getComputer(packet.playerEntity);
+        ServerComputer computer = getActiveComputer(packet.playerEntity);
         if (computer == null) return;
         if (computer.getID() != packet.computer) return;
 
@@ -102,14 +121,14 @@ public class ServerPacketHandler {
                     List<String> nextPaths = new ArrayList<>(Arrays.asList(fs.list(p)));
 
                     if (nextPaths.isEmpty()) {
-                        resolvedPaths.add(p);
+                        resolvedPaths.add("D;" + p);
                     } else {
                         for (String next : nextPaths) {
                             paths.add(fs.combine(p, next));
                         }
                     }
                 } else {
-                    resolvedPaths.add(p);
+                    resolvedPaths.add("F;" + p);
                 }
             }
         } catch (FileSystemException e) {

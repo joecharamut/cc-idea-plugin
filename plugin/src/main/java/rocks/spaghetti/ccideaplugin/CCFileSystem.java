@@ -3,6 +3,7 @@ package rocks.spaghetti.ccideaplugin;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.openapi.vfs.VirtualFileListener;
 import com.intellij.openapi.vfs.VirtualFileSystem;
+import com.intellij.testFramework.LightVirtualFile;
 import org.jetbrains.annotations.NonNls;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -19,13 +20,13 @@ public class CCFileSystem extends VirtualFileSystem {
 
     @Override
     public @Nullable VirtualFile findFileByPath(@NotNull @NonNls String path) {
-        return null;
+        return new LightVirtualFile(path, path);
     }
 
     @Override
     public void refresh(boolean asynchronous) {
         Thread refreshThread = new Thread(() -> {
-
+            LOGGER.warn("hi");
         });
         refreshThread.start();
         if (!asynchronous) {
@@ -39,7 +40,8 @@ public class CCFileSystem extends VirtualFileSystem {
 
     @Override
     public @Nullable VirtualFile refreshAndFindFileByPath(@NotNull String path) {
-        return null;
+        refresh(false);
+        return findFileByPath(path);
     }
 
     @Override

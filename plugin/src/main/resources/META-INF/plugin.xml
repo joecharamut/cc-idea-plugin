@@ -10,13 +10,28 @@
     <!-- please see https://plugins.jetbrains.com/docs/intellij/plugin-compatibility.html
          on how to target different products -->
     <depends>com.intellij.modules.platform</depends>
+    <depends>au.com.glassechidna.luanalysis</depends>
 
     <extensions defaultExtensionNs="com.intellij">
-        <toolWindow id="ccideaplugin" factoryClass="rocks.spaghetti.ccideaplugin.CCToolWindowFactory" icon="toolwindows/toolWindowCommander.svg" />
-        <virtualFileSystem implementationClass="rocks.spaghetti.ccideaplugin.CCFileSystem" />
+        <toolWindow id="ccideaplugin"
+                factoryClass="rocks.spaghetti.ccideaplugin.CCToolWindowFactory"
+                icon="toolwindows/toolWindowCommander.svg"
+        />
+
+        <virtualFileSystem implementationClass="rocks.spaghetti.ccideaplugin.CCFileSystem" physical="false" />
+
+        <additionalLibraryRootsProvider implementation="rocks.spaghetti.ccideaplugin.CCLibraryProvider" />
     </extensions>
 
     <actions>
-        <!-- Add your actions here -->
+        <group id="CCIdeaPlugin.Actions" text="CC Integration" popup="true">
+            <action id="CCIdeaPlugin.UploadAction"
+                    text="Upload to Computer"
+                    class="rocks.spaghetti.ccideaplugin.UploadToComputerAction"
+                    icon="actions/upload.svg">
+            </action>
+
+            <add-to-group group-id="EditorPopupMenu" relative-to-action="Copy.Paste.Special" anchor="after" />
+        </group>
     </actions>
 </idea-plugin>

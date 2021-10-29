@@ -4,12 +4,21 @@ import com.intellij.icons.AllIcons;
 import com.intellij.notification.Notification;
 import com.intellij.notification.NotificationType;
 import com.intellij.notification.Notifications;
+import com.intellij.openapi.actionSystem.AnAction;
+import com.intellij.openapi.application.ApplicationManager;
+import com.intellij.openapi.progress.PerformInBackgroundOption;
+import com.intellij.openapi.progress.ProgressIndicator;
+import com.intellij.openapi.progress.ProgressManager;
+import com.intellij.openapi.progress.Task;
 import com.intellij.openapi.project.Project;
-import org.apache.log4j.Level;
+import com.intellij.openapi.vfs.VirtualFile;
+import com.intellij.openapi.vfs.VirtualFileManager;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
+import org.jetbrains.annotations.NotNull;
 import rocks.spaghetti.ccideaplugin.rmi.RmiStub;
 
+import javax.swing.tree.DefaultMutableTreeNode;
 import java.net.MalformedURLException;
 import java.rmi.Naming;
 import java.rmi.NotBoundException;
@@ -67,12 +76,38 @@ public class CCIdeaPlugin {
         return false;
     }
 
-    public void test() {
-        try {
-            LOGGER.warn(connection.getActiveComputer());
-            LOGGER.warn(Arrays.toString(connection.getFiles(0)));
-        } catch (RemoteException e) {
-            LOGGER.error(e);
-        }
+    public void test(CCToolWindow window) {
+        ProgressManager.getInstance().run(new Task.Backgroundable(
+                project,
+                "Refreshing computer",
+                false,
+                PerformInBackgroundOption.ALWAYS_BACKGROUND
+        ) {
+            @Override
+            public void run(@NotNull ProgressIndicator indicator) {
+                try {
+                    int computer = connection.getActiveComputer();
+                    String[] files = connection.getFiles(computer);
+                    LOGGER.warn(Arrays.toString(files));
+                    if (files != null) {
+                        ApplicationManager.getApplication().invokeLater(() -> {
+                            DefaultMutableTreeNode computerNode = new DefaultMutableTreeNode("Computer " + computer);
+
+                            for (String file : files) {
+                                DefaultMutableTreeNode fileNode = new DefaultMutableTreeNode(file);
+                                computerNode.add(fileNode);
+                            }
+
+                            window.getTreeModel().insertNodeInto(computerNode, window.getRootNode(), 0);
+                            LOGGER.warn(computerNode);
+
+                            VirtualFileManager.getInstance().asyncRefresh(null);
+                        });
+                    }
+                } catch (RemoteException e) {
+                    LOGGER.error(e);
+                }
+            }
+        });
     }
 }

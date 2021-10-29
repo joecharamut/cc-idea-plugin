@@ -2,60 +2,96 @@ package rocks.spaghetti.ccideaplugin;
 
 import com.intellij.icons.AllIcons;
 import com.intellij.openapi.actionSystem.*;
-import com.intellij.openapi.ui.popup.IconButton;
-import com.intellij.ui.navigation.Place;
-import com.intellij.ui.roots.ToolbarPanel;
+import com.intellij.openapi.application.ApplicationManager;
+import com.intellij.openapi.project.Project;
+import com.intellij.openapi.vfs.VirtualFile;
+import com.intellij.openapi.vfs.VirtualFileManager;
+import com.intellij.openapi.vfs.VirtualFileSystem;
 import com.intellij.ui.treeStructure.Tree;
 import com.intellij.uiDesigner.core.GridConstraints;
 import com.intellij.uiDesigner.core.GridLayoutManager;
 import com.intellij.uiDesigner.core.Spacer;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
+import javax.swing.event.TreeModelEvent;
+import javax.swing.event.TreeModelListener;
 import javax.swing.tree.*;
 import java.awt.*;
-import java.net.MalformedURLException;
-import java.rmi.Naming;
-import java.rmi.NotBoundException;
-import java.rmi.RemoteException;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.io.IOException;
+import java.util.Arrays;
 
 import static rocks.spaghetti.ccideaplugin.CCIdeaPlugin.LOGGER;
 
 public class CCToolWindow {
+    private final Project project;
     private JPanel content;
-    private JButton button1;
     private ActionToolbar toolbar;
     private JComponent toolbarComponent;
     private Tree tree;
 
     private boolean connected = false;
+    private DefaultMutableTreeNode rootNode;
 
-    public CCToolWindow() {
+    public CCToolWindow(@NotNull Project project) {
         $$$setupUI$$$();
+
+        this.project = project;
         toolbar.setTargetComponent(content);
 
-        DefaultMutableTreeNode root = (DefaultMutableTreeNode) tree.getModel().getRoot();
+        rootNode = (DefaultMutableTreeNode) tree.getModel().getRoot();
         tree.setRootVisible(false);
         tree.setShowsRootHandles(true);
-        tree.expandPath(new TreePath(new Object[]{root}));
+        tree.expandPath(new TreePath(new Object[]{rootNode}));
 
         DefaultMutableTreeNode node = new DefaultMutableTreeNode("Computer ID 0");
-        root.add(node);
+        rootNode.add(node);
         node.add(new DefaultMutableTreeNode("pipis"));
         node.add(new DefaultMutableTreeNode("pipis"));
         node.add(new DefaultMutableTreeNode("pipis"));
         node.add(new DefaultMutableTreeNode("pipis"));
 
-        tree.expandPath(new TreePath(root.getPath()));
+        tree.expandPath(new TreePath(rootNode.getPath()));
+
+        tree.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                int row = tree.getRowForLocation(e.getX(), e.getY());
+                TreePath path = tree.getPathForLocation(e.getX(), e.getY());
+                if (row != -1 && e.getClickCount() == 2) {
+                    LOGGER.warn(path);
+                    ApplicationManager.getApplication().runReadAction(() -> {
+                        String url = VirtualFileManager.constructUrl("computercraft", "/test");
+                        VirtualFile file = VirtualFileManager.getInstance()
+                                .findFileByUrl(url);
+                        LOGGER.warn(file.getPresentableUrl());
+                        try {
+                            LOGGER.warn(Arrays.toString(file.contentsToByteArray()));
+                        } catch (IOException ioException) {
+                            ioException.printStackTrace();
+                        }
+                    });
+                }
+            }
+        });
     }
 
     public JPanel getContent() {
         return content;
     }
 
+    public DefaultTreeModel getTreeModel() {
+        return (DefaultTreeModel) tree.getModel();
+    }
+
     public DefaultMutableTreeNode getRootNode() {
-        return (DefaultMutableTreeNode) tree.getModel().getRoot();
+        return rootNode;
+    }
+
+    public DefaultMutableTreeNode getComputerNode(int id) {
+        return null;
     }
 
     private ActionToolbar createToolbar() {
@@ -79,7 +115,7 @@ public class CCToolWindow {
                             @Override
                             public void actionPerformed(@NotNull AnActionEvent e) {
                                 LOGGER.warn("test");
-                                CCIdeaPlugin.getInstance().test();
+                                CCIdeaPlugin.getInstance().test(CCToolWindow.this);
                             }
                         }
                 ), true);
@@ -99,9 +135,6 @@ public class CCToolWindow {
         content.add(toolbarComponent, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
         tree = new Tree();
         content.add(tree, new GridConstraints(1, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
-        button1 = new JButton();
-        button1.setText("Button");
-        content.add(button1, new GridConstraints(3, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
         final Spacer spacer1 = new Spacer();
         content.add(spacer1, new GridConstraints(2, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_VERTICAL, 1, GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0, false));
     }

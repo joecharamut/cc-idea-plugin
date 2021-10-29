@@ -7,16 +7,16 @@ import rocks.spaghetti.ccideaplugin.CCIdeaPlugin;
 import rocks.spaghetti.ccideaplugin.network.Packet;
 import rocks.spaghetti.ccideaplugin.network.ServerPacketHandler;
 
-public class GetComputerC2SPacket implements Packet<ServerPacketHandler> {
-    public static final Identifier ID = new Identifier(CCIdeaPlugin.MOD_ID, "GetComputerC2SPacket".toLowerCase());
+public class GetComputersC2SPacket implements Packet<ServerPacketHandler> {
+    public static final Identifier ID = new Identifier(CCIdeaPlugin.MOD_ID, "GetComputersC2SPacket".toLowerCase());
 
     public final ServerPlayerEntity playerEntity;
 
-    public GetComputerC2SPacket() {
+    public GetComputersC2SPacket() {
         this.playerEntity = null;
     }
 
-    public GetComputerC2SPacket(PacketByteBuf buf, ServerPlayerEntity playerEntity) {
+    public GetComputersC2SPacket(PacketByteBuf buf, ServerPlayerEntity playerEntity) {
         this.playerEntity = playerEntity;
     }
 

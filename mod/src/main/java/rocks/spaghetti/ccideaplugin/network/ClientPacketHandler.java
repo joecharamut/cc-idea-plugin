@@ -5,7 +5,7 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.util.Identifier;
 import rocks.spaghetti.ccideaplugin.network.s2c.FileListS2CPacket;
-import rocks.spaghetti.ccideaplugin.network.s2c.GetComputerS2CPacket;
+import rocks.spaghetti.ccideaplugin.network.s2c.GetComputersS2CPacket;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -18,7 +18,7 @@ public class ClientPacketHandler {
 
     public void register() {
         registerPacket(FileListS2CPacket.ID, FileListS2CPacket.class);
-        registerPacket(GetComputerS2CPacket.ID, GetComputerS2CPacket.class);
+        registerPacket(GetComputersS2CPacket.ID, GetComputersS2CPacket.class);
     }
 
     private void registerPacket(Identifier id, Class<? extends Packet<ClientPacketHandler>> packetClass) {
@@ -47,7 +47,7 @@ public class ClientPacketHandler {
         }
     }
 
-    public void onGetComputer(GetComputerS2CPacket packet) {
+    public void onGetComputer(GetComputersS2CPacket packet) {
         System.out.println(packet);
         WrappedClientNetworking.receiveActiveComputer(packet.computer);
     }
