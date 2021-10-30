@@ -1,14 +1,20 @@
 package rocks.spaghetti.ccideaplugin;
 
+import dan200.computercraft.ComputerCraft;
 import dan200.computercraft.api.lua.IComputerSystem;
+import dan200.computercraft.shared.computer.upload.FileUpload;
+import dan200.computercraft.shared.network.server.UploadFileMessage;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import rocks.spaghetti.ccideaplugin.network.WrappedClientNetworking;
 import rocks.spaghetti.ccideaplugin.rmi.RmiStub;
 
+import java.io.OutputStream;
+import java.nio.ByteBuffer;
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @Environment(EnvType.CLIENT)
@@ -64,7 +70,19 @@ public class IdeaApi extends UnicastRemoteObject implements RmiStub {
     }
 
     @Override
-    public String getFileContent(int computer, String file) throws RemoteException {
+    public OutputStream downloadFile(int computer, String file) throws RemoteException {
         throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public boolean uploadFile(int computer, String name, byte[] content) throws RemoteException {
+        int instanceID = ComputerCraft.clientComputerRegistry.get(computer).getInstanceID();
+
+        ByteBuffer buf = ByteBuffer.allocate(content.length).put(content);
+        byte[] hash = FileUpload.getDigest(buf);
+        buf.rewind();
+
+        UploadFileMessage.send(instanceID, List.of(new FileUpload(name, buf, hash)));
+        return false;
     }
 }

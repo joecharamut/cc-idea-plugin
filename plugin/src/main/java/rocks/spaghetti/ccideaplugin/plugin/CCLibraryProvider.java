@@ -1,6 +1,5 @@
-package rocks.spaghetti.ccideaplugin;
+package rocks.spaghetti.ccideaplugin.plugin;
 
-import com.intellij.icons.AllIcons;
 import com.intellij.navigation.ItemPresentation;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.roots.AdditionalLibraryRootsProvider;

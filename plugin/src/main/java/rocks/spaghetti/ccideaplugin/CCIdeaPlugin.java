@@ -6,6 +6,7 @@ import com.intellij.notification.NotificationType;
 import com.intellij.notification.Notifications;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.application.ApplicationManager;
+import com.intellij.openapi.application.ReadAction;
 import com.intellij.openapi.progress.PerformInBackgroundOption;
 import com.intellij.openapi.progress.ProgressIndicator;
 import com.intellij.openapi.progress.ProgressManager;
@@ -19,6 +20,9 @@ import org.jetbrains.annotations.NotNull;
 import rocks.spaghetti.ccideaplugin.rmi.RmiStub;
 
 import javax.swing.tree.DefaultMutableTreeNode;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.rmi.Naming;
 import java.rmi.NotBoundException;
@@ -109,5 +113,22 @@ public class CCIdeaPlugin {
                 }
             }
         });
+    }
+
+    public void test2(VirtualFile file) {
+        try {
+            int computer = connection.getActiveComputer();
+            ApplicationManager.getApplication().invokeLater(() -> {
+                ReadAction.run(() -> {
+                    try {
+                        connection.uploadFile(computer, file.getName(), file.contentsToByteArray());
+                    } catch (IOException e) {
+                        LOGGER.error(e);
+                    }
+                });
+            });
+        } catch (RemoteException e) {
+            LOGGER.error(e);
+        }
     }
 }

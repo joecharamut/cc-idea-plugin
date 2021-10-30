@@ -100,9 +100,7 @@ public class CCToolWindow {
                         new AnAction("Connect", "Connect/Disconnect from Game", AllIcons.Nodes.Pluginobsolete) {
                             @Override
                             public void actionPerformed(@NotNull AnActionEvent e) {
-                                if (!connected) {
-                                    connected = CCIdeaPlugin.getInstance().connect();
-                                }
+                                connected = CCIdeaPlugin.getInstance().connect();
                             }
 
                             @Override

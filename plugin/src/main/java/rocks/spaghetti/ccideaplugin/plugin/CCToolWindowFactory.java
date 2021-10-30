@@ -1,4 +1,4 @@
-package rocks.spaghetti.ccideaplugin;
+package rocks.spaghetti.ccideaplugin.plugin;
 
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.wm.ToolWindow;
@@ -6,6 +6,8 @@ import com.intellij.openapi.wm.ToolWindowFactory;
 import com.intellij.ui.content.Content;
 import com.intellij.ui.content.ContentFactory;
 import org.jetbrains.annotations.NotNull;
+import rocks.spaghetti.ccideaplugin.CCIdeaPlugin;
+import rocks.spaghetti.ccideaplugin.CCToolWindow;
 
 public class CCToolWindowFactory implements ToolWindowFactory {
     @Override

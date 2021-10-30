@@ -49,7 +49,7 @@ public class ClientPacketHandler {
 
     public void onGetComputer(GetComputersS2CPacket packet) {
         System.out.println(packet);
-        WrappedClientNetworking.receiveActiveComputer(packet.computer);
+        WrappedClientNetworking.receiveActiveComputer(packet.activeComputer);
     }
 
     public void onFileList(FileListS2CPacket packet) {

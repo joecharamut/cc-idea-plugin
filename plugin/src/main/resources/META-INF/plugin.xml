@@ -14,13 +14,13 @@
 
     <extensions defaultExtensionNs="com.intellij">
         <toolWindow id="ccideaplugin"
-                factoryClass="rocks.spaghetti.ccideaplugin.CCToolWindowFactory"
-                icon="toolwindows/toolWindowCommander.svg"
+                factoryClass="rocks.spaghetti.ccideaplugin.plugin.CCToolWindowFactory"
+                icon="/icons/computer.png"
         />
 
-        <virtualFileSystem implementationClass="rocks.spaghetti.ccideaplugin.CCFileSystem" physical="false" />
+        <virtualFileSystem implementationClass="rocks.spaghetti.ccideaplugin.plugin.CCFileSystem" physical="false" />
 
-        <additionalLibraryRootsProvider implementation="rocks.spaghetti.ccideaplugin.CCLibraryProvider" />
+        <additionalLibraryRootsProvider implementation="rocks.spaghetti.ccideaplugin.plugin.CCLibraryProvider" />
     </extensions>
 
     <actions>

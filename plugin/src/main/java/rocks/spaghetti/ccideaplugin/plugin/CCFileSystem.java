@@ -1,4 +1,4 @@
-package rocks.spaghetti.ccideaplugin;
+package rocks.spaghetti.ccideaplugin.plugin;
 
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.openapi.vfs.VirtualFileListener;
